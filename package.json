@@ -1,0 +1,28 @@
+{
+	"name": "hello",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"db:write": "node -r dotenv/config ./src/write.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ryhnnl/hello.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/ryhnnl/hello/issues"
+	},
+	"homepage": "https://github.com/ryhnnl/hello#readme",
+	"dependencies": {
+		"dotenv": "5.0.1",
+		"exceljs": "1.4.6",
+		"pg": "7.4.2"
+	},
+	"devDependencies": {
+		"jsdoc": "3.5.5"
+	}
+}
