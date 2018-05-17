@@ -29,6 +29,8 @@ async function searchInPeople(personId='', personName='-') {
 
 				searchResults = res.rows
 
+			} else {
+				searchResults = {message: 'there is no person with given id or name'}
 			}
 			
 			// console.log(res.rows)
@@ -129,7 +131,6 @@ async function getProfile(personId) {
 		).then(res => {
 
 			if(res.rowCount > 0) {
-
 				
 				let obj = Object.assign({}, res.rows[0])
 
