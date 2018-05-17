@@ -4,8 +4,21 @@ const { gradientDescent, possiblity } = require('./regression.js')
 
 async function createDataSets(personId) {
 
+	let person
 	let model = []
 	let testSet = []
+
+	await
+	getPerson(personId).then(res => {
+		person = res
+	})
+
+	// veritabaninda boyle biri yoksa undefined doner
+
+	if(!person) {
+		console.log(`there is no one with given id`)
+		return 
+	}
 
 	await 
 	getRelatedPeople(personId).then(res => {
@@ -56,26 +69,71 @@ async function createDataSets(personId) {
 
 }
 
-createDataSets('2014123024').then(res => {
+// Verilen kisi id'sine gore arkadas onerilerini bulur
+async function findSuggestions(personId, iterCount=100, stepSize=0.01) {
 
-	let f = gradientDescent(res.model, 100, 0.001, 15)
-	console.log(f)
+	let data
 
-	res.testSet.forEach(e => {
+	await 
+	createDataSets(personId)
+	.then(res => {
+
+		data = res
+
+	})
+
+
+	if(!data) {
+
+		return {message: 'person not found with the id'}
+	}
+
+	let f = gradientDescent(data.model, iterCount, stepSize, 15)
+	// console.log(f)
+
+	data.testSet.forEach(e => {
 		e.p = possiblity(e.x, f, 15)
-		//console.log(`${e.id} ${e.p}`)
+		// console.log(`${e.id} ${e.p}`)
 	})
 
-	res.testSet.sort((a,b) =>b.p > a.p)
-	console.log(res.testSet)
+	await bubbleSort(data.testSet)
 
-	let suggestions = res.testSet.slice(undefined, 10)
+	// console.log(data.testSet)
 
-	suggestions.forEach(e => {
+	let suggestions = data.testSet.slice(0, 10)
 
-		getPerson(e.id).then(res => {
-			console.log(res)
+	for(let i = 0; i < suggestions.length; i++) {
+
+		await getPerson(suggestions[i].id).then(res => {
+			suggestions[i].name = res.name
 		})
-	})
+	}
 
+	return {suggestions, f}
+}
+/*
+findSuggestions('2014123024', 100, 0.01).then(res => {
+	console.log(res.f)
+	console.log(res.suggestions)
 })
+*/
+async function bubbleSort(set) {
+
+	for(let i = 0; i < set.length; i++) {
+
+		for (let j = i+1; j < set.length; j++) {
+
+			if(set[i].p < set[j].p) {
+
+				let tmp = set[i]
+				set[i] = set[j]
+				set[j] = tmp
+			}
+		}
+	}
+
+	return set
+	
+}
+
+module.exports = findSuggestions
