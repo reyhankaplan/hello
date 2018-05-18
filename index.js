@@ -1,9 +1,12 @@
 const express = require('express')
+const cors = require('cors')
 
 const findSuggestions = require('./src/hello')
 const { searchInPeople } = require('./src/read.js')
 
 const app = express()
+
+app.use(cors())
 
 app.get('/person', (req, res) => {
 
@@ -29,8 +32,8 @@ app.get('/hello', (req, res) => {
 	}
 	console.log(req.query.id)
 
-	let iterCount = req.query.iter || 10000
-	let stepSize = req.query.step || 0.001
+	let iterCount = req.query.iter || 1000
+	let stepSize = req.query.step || 0.01
 
 	console.log(`Step size: ${stepSize}\nIteration count: ${iterCount}`)
 

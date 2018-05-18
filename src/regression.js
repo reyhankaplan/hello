@@ -5,7 +5,7 @@
 //				y: etiket (1|0) 
 //			},
 //	 ...]
-function gradientDescent(data, maxIterCount=100, stepSize=0.01, attributeCount=15) {
+function gradientDescent(data, maxIterCount=1000, stepSize=0.01, attributeCount=15) {
 
 	let N = data.length
 	let factors = Array(attributeCount+1).fill(1) 

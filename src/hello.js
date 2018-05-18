@@ -70,7 +70,7 @@ async function createDataSets(personId) {
 }
 
 // Verilen kisi id'sine gore arkadas onerilerini bulur
-async function findSuggestions(personId, iterCount=100, stepSize=0.01) {
+async function findSuggestions(personId, iterCount=1000, stepSize=0.01) {
 
 	let data
 
