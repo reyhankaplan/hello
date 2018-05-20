@@ -16,7 +16,7 @@ app.get('/person', (req, res) => {
 	searchInPeople(id, name).then(r => {
 
 		if(r.message) {
-			res.send(r.message)
+			res.send(r)
 		}else {
 			res.send(r)
 		}
