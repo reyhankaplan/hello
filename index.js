@@ -28,18 +28,14 @@ app.get('/person', (req, res) => {
 app.get('/hello', (req, res) => {
 	
 	if(!req.query.id) {
-		res.end('missing person id')
+		res.end({message: 'missing person id'})
 	}
-	console.log(req.query.id)
 
 	let iterCount = req.query.iter || 1000
 	let stepSize = req.query.step || 0.01
 
-	console.log(`Step size: ${stepSize}\nIteration count: ${iterCount}`)
-
 	findSuggestions(req.query.id, iterCount, stepSize).then(r => {
 
-		console.log(r)
 		res.send(r)
 	})
 })

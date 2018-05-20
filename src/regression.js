@@ -1,10 +1,20 @@
-// data: [
-//			{
-//				id: kisi id 
-//				x: [(0-10), (0-10), ...]
-//				y: etiket (1|0) 
-//			},
-//	 ...]
+/*
+	Oluşturulan veri seti taslağı:
+	data: [
+				{
+					id: kisi id 
+					x: [(0-10), (0-10), ...]
+					y: etiket (1|0) 
+				},
+		 ...]
+*/
+
+/*
+	Verilen pseudo kodu örnek alınarak yazılan gradientDescent fonksiyonu.
+ 	İterasyon sayısını, adım boyutunu, özellik sayısını ve verisetini parametre olarak alır.
+ 	Yukarıdaki veri seti taslağına göre açıklarsak,
+ 	her bir x değerinin y etiket değerine etkisini gösteren katsayıları döndürür.
+*/
 function gradientDescent(data, maxIterCount=1000, stepSize=0.01, attributeCount=15) {
 
 	let N = data.length
@@ -45,9 +55,11 @@ function gradientDescent(data, maxIterCount=1000, stepSize=0.01, attributeCount=
 	return factors
 }
 
-// dataVector: xi'ler, yanii kisinin her 
-// ozellik icin verdigi 1-10 arasindaki puanlar
-// factors: katsayilar, xi'lerin sayisindan bir fazla
+/*
+	dataVector: xi'ler, yani kişinin her bir özellik için verdiği 1-10 arasındaki puanlardır
+	factors: katsayılar, sayısı xi'lerin sayısından bir fazla
+	Verilen dökümanda formülü verilen, arkadaşlık olasılığını hesaplayan fonksiyon
+*/
 function possiblity(dataVector, factors, attributeCount=15) {
 
 	let tempSum = factors[0]
@@ -61,7 +73,7 @@ function possiblity(dataVector, factors, attributeCount=15) {
 }
 
 /*
-// Modulun ornek kullanimi
+// Modülün uydurulan bir verisetinde örnek kullanımı
 
 let f =	gradientDescent(
 			[

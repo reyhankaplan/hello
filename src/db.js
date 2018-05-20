@@ -1,8 +1,11 @@
 const { Pool } = require('pg')
 
-// Bu fonksiyon PostgreSQL veritabanina sorgular gonderir ve cevaplari dondurur
-// Promise dondurur
-
+/*
+	Bu fonksiyon PostgreSQL veritabanı ile iletişim kurmak için
+	Pool nesnesi oluşturur ve o nesne üzerinden sorgular göndermeyi
+	sonuçları almayı sağlar
+	Veritabanı bağlantı bilgileri .env dosyası içerisindedir 
+*/
 let db = (() => {
 	const pool = new Pool()
 
@@ -24,7 +27,7 @@ let db = (() => {
 })()
 
 /*
-// ornek kullanimi
+// Örnek kullanımı:
 db(
  	`SELECT table_name FROM information_schema.tables\
     WHERE table_schema='public' AND table_type='BASE TABLE'`

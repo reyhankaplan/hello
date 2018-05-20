@@ -2,33 +2,43 @@ const { getRelatedPeople, getProfile, getPerson } = require('./read.js')
 
 const { gradientDescent, possiblity } = require('./regression.js')
 
+/*
+	Bu dosyada diğer dosyalarda yazılan fonksiyonlar kullanılarak parçalar birleştirilmiş
+	ve arkadaş önerilerini döndüren fonksiyon export edilmiştir.
+*/
+
+// Bu fonksiyon veritabanından verileri okur ve verisetini oluşturur.
 async function createDataSets(personId) {
 
 	let person
 	let model = []
 	let testSet = []
 
+	// Kişinin veritabanında varlığı kontrol edilir
+
 	await
 	getPerson(personId).then(res => {
 		person = res
 	})
 
-	// veritabaninda boyle biri yoksa undefined doner
-
+	// veritabanında böyle biri yoksa undefined döner
 	if(!person) {
 		console.log(`there is no one with given id`)
 		return 
 	}
 
+	// Kişinin arkadaşı olan ve olmayan kişiler bulunur
+
 	await 
 	getRelatedPeople(personId).then(res => {
 
+		// Arkadaşların tamamı modele eklenir
 		res.friends.forEach(e => {
 
-			model.push({id: e.friend_id, y:1})
-			// console.log(`Hello, my friend... ${e.friend_id}`)	
+			model.push({id: e.friend_id, y:1})	
 		})
 		
+		// Arkadaşı olmayan kişilerin yarısı modele yarısı test setine eklenir
 		res.nonfriends.forEach((e, index, arr) => {
 
 			if(index < arr.length/2) {
@@ -38,11 +48,10 @@ async function createDataSets(personId) {
 
 				testSet.push({id: e.id})
 			}
-
-			// console.log(`Hello, man... ${e.id}`)	
 		})
 	})
 
+	// Modeldeki kişilerin profil bilgileri de modele eklenir
 	for(let i = 0; i < model.length; i++) {
 		
 		await getProfile(model[i].id).then(res => {
@@ -51,6 +60,7 @@ async function createDataSets(personId) {
 		})
 	}
 
+	// Test verisindeki kişilerin profil bilgileri test setine eklenir
 	for(let i = 0; i < testSet.length; i++) {
 
 		await getProfile(testSet[i].id).then(res => {
@@ -58,22 +68,17 @@ async function createDataSets(personId) {
 			testSet[i].x = res.values
 		})
 	}
-	// console.log('-------------------------MODEL--------------------------------------------')
-	// console.log('--------------------------------------------------------------------------')
-	// console.log(model)
-	// console.log('--------------------------------------------------------------------------')
-	// console.log('-------------------------TEST-SET-----------------------------------------')
-	// console.log(testSet)
 
+	// model ve test seti döndürülür
 	return {model, testSet}
-
 }
 
-// Verilen kisi id'sine gore arkadas onerilerini bulur
+// Bu fonksiyonda verilen parametrelere göre arkadaş önerileri döndürülür
 async function findSuggestions(personId, iterCount=1000, stepSize=0.01) {
 
 	let data
 
+	// Veri seti oluşturulur
 	await 
 	createDataSets(personId)
 	.then(res => {
@@ -82,41 +87,48 @@ async function findSuggestions(personId, iterCount=1000, stepSize=0.01) {
 
 	})
 
-
+	// Kişi bulunamadığında mesaj döndürür
 	if(!data) {
 
 		return {message: 'person not found with the id'}
 	}
 
+	// Katsayılar hesaplanır
 	let f = gradientDescent(data.model, iterCount, stepSize, 15)
-	// console.log(f)
 
+	// Test seti arkadaş olma olasılığını hesaplayan fonksiyona gönderilir
 	data.testSet.forEach(e => {
 		e.p = possiblity(e.x, f, 15)
-		// console.log(`${e.id} ${e.p}`)
 	})
 
+	// Test seti p değerlerine göre sıralanır
 	await bubbleSort(data.testSet)
 
-	// console.log(data.testSet)
-
+	// Test setinden olasılığı yüksek olan ilk 10 kişi öneri olarak alınır
 	let suggestions = data.testSet.slice(0, 10)
 
+	// Önerilen kişilerin isimleri eklenir
 	for(let i = 0; i < suggestions.length; i++) {
 
 		await getPerson(suggestions[i].id).then(res => {
 			suggestions[i].name = res.name
 		})
 	}
-
+	// Öneriler ve katsayılar döndürülür
 	return {suggestions, f}
 }
 /*
+
+// Örnek kullanımı:
+
 findSuggestions('2014123024', 100, 0.01).then(res => {
 	console.log(res.f)
 	console.log(res.suggestions)
 })
+
 */
+
+// Test setini sıralamak için kullanılan asenkron fonksiyon
 async function bubbleSort(set) {
 
 	for(let i = 0; i < set.length; i++) {
@@ -131,9 +143,7 @@ async function bubbleSort(set) {
 			}
 		}
 	}
-
 	return set
-	
 }
 
 module.exports = findSuggestions

@@ -1,5 +1,6 @@
 const db = require('./db')
 
+// Veritabanı sorguları sabit olarak tanımlanır
 const QUERIES = {
 	get_non_friends: "select id from person where id not in \
 					(select friend_id from friendship where person_id=$1) and \
@@ -10,9 +11,9 @@ const QUERIES = {
 	get_profile: "select * from profile where id=$1",
 	get_person: "select * from person where id=$1",
 }
-// get_people_for_search sorgusunda isim girilmemisse $1 yerine - at
 
-// Bu fonksiyon isme veya id'ye gore veritabanindan kisileri alip dondurur
+// Bu fonksiyon isme veya id'ye gore veritabanından kişileri okur ve döndürür
+// Uygulamada id (okul numarası) veya isme göre arama kısmında kullanılır
 async function searchInPeople(personId='', personName='-') {
 
 	let searchResults = []
@@ -33,9 +34,6 @@ async function searchInPeople(personId='', personName='-') {
 				searchResults = {message: 'there is no person with given id or name'}
 			}
 			
-			// console.log(res.rows)
-			// console.log(`Row count: ${res.rowCount}...`)
-			
 		}).catch(err => {
 			console.log(err)
 		})
@@ -44,7 +42,8 @@ async function searchInPeople(personId='', personName='-') {
 }
 /*
 
-// searchInPeople kullanimi
+// Örnek kullanımı:
+
 searchInPeople('', 'can').then(res => {
 
 	res.forEach(e => {
@@ -52,9 +51,10 @@ searchInPeople('', 'can').then(res => {
 		console.log(`${e.id} - ${e.name}`)
 	})
 })
+
 */
 
-// Id'si verilen kisinin arkadaslarini ve arkadasi olmayanlari getiren fonksiyon
+// Bu fonksiyon id'si verilen kişinin arkadaşlarını ve arkadaşı olmayanları getirir
 async function getRelatedPeople(personId) {
 	let friends = []
 	let nonfriends = []
@@ -72,10 +72,7 @@ async function getRelatedPeople(personId) {
 				friends = res.rows
 
 			}
-			
-			// console.log(res.rows)
-			// console.log(`Row count: ${res.rowCount}...`)
-			
+
 		}).catch(err => {
 			console.log(err)
 		})
@@ -94,9 +91,6 @@ async function getRelatedPeople(personId) {
 
 			}
 			
-			// console.log(res.rows)
-			// console.log(`Row count: ${res.rowCount}...`)
-			
 		}).catch(err => {
 			console.log(err)
 		})
@@ -104,6 +98,9 @@ async function getRelatedPeople(personId) {
 	return {friends, nonfriends}
 }
 /*
+
+// Örnek Kullanımı:
+
 getRelatedPeople('2014123024').then(res => {
 
 	res.friends.forEach(e => {
@@ -116,8 +113,9 @@ getRelatedPeople('2014123024').then(res => {
 		console.log(`Hello, man... ${e.id}`)	
 	})
 })
-*/
 
+*/
+// Bu fonksiyon verilen id'ye göre kişinin profilini döndürür
 async function getProfile(personId) {
 
 	let profile = {id: personId, values:[]}
@@ -139,12 +137,9 @@ async function getProfile(personId) {
 				for(let property in obj) {
 
 					profile.values.push(obj[property])
-					// console.log(`Pushed property: ${property}`)
 				}
 			}
 			
-			// console.log(res.rows[0])
-			// console.log(`Row count: ${res.rowCount}...`)
 			
 		}).catch(err => {
 			console.log(err)
@@ -153,12 +148,17 @@ async function getProfile(personId) {
 	return profile
 }
 /*
+
+// Örnek kullanımı:
+
 getProfile('2014123024').then(res => {
 
 	console.log(res)
 })
+
 */
 
+// Bu fonksiyon id'ye göre kişiyi döndürür
 async function getPerson(personId) {
 
 	let person
@@ -176,10 +176,7 @@ async function getPerson(personId) {
 				person = res.rows[0]
 
 			}
-			
-			// console.log(res.rows)
-			// console.log(`Row count: ${res.rowCount}...`)
-			
+
 		}).catch(err => {
 			console.log(err)
 		})
@@ -187,8 +184,13 @@ async function getPerson(personId) {
 	return person
 }
 /*
+
+// Örnek kullanımı:
+
 getPerson('2014123024').then(res => {
 	console.log(res)
 })
+
 */
+
 module.exports = { searchInPeople, getRelatedPeople, getProfile, getPerson }

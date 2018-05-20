@@ -1,24 +1,21 @@
-/**
- *
- *	Projenin ana dizininden
- *	npm run db:write
- *	komutu calistirilarak, 
- *	dosyalardaki verilerin PostgreSQL veritabanina yazilmasi saglanir
- *	Veritabaninin baglanti bilgileri .env dosyasindadir
- *
- **/
+/*
+	Projenin ana dizininden
+	npm run db:write
+	komutu calıştırılarak, 
+	ödev için verilen xlsx ve csv dosyalarındaki verilerin 
+	PostgreSQL veritabanına yazılması sağlanır.
+*/
 
+// Veritabanı işlemleri için kullanılan db modülü (./db.js dosyası)
 const db = require('./db')
-// Veritabanina sorgu gonderen ayri bir javascript dosyasinda yazilan modul
-const Excel = require('exceljs')
-// xlsx ve csv uzantili dosyalari okumak icin kullanilan hazir modul
 
+// xlsx ve csv uzantılı dosyaları okumak icin kullanılan modül (npm ile yüklendi)
+const Excel = require('exceljs')
+
+// Dosyaların isimleri ve kullanılacak sorgular sabit tanımlanır
 const xlsxStudentList = './files/ogrenciListesi.xlsx'
 const csvStudentProfile = './files/ogrenciProfil.csv'
 const csvStudentNetwork = './files/ogrenciNetwork.csv'
-
-// db baglantisini denedim exceljs'i de denedim
-// ikisi ile veriyi db'ye atacagim
 
 const QUERIES = {
 	add_person: 'insert into person (id, name) values($1, $2)',
@@ -30,61 +27,51 @@ const QUERIES = {
     					values ($1, $2);',
 }
 
-
 //----------------------------------------------------------------------------------------------------
 
-// Yapilacak islem kalmadiginda process biterken bitttigini logla
+// Process biterken bildirir
 process.on('exit', (code) => {
   
   console.log(`About to exit with code: ${code}`);
 
 });
 
-// Asagida yazilan fonksiyonlar cagirilarak veriler veri tabanina yazilir
+// Aşağıdaki tanımlanan fonksiyonlar çağırılır ve yazma işlemi yapılır
 readXlsxFileWriteToDB()
 readCsvFileWriteToDBforFriendship()
 readCsvFileWriteToDBforProfile()
 
 //----------------------------------------------------------------------------------------------------
 
-// Bu fonksiyon ogrenciListesi.xlsx dosyasindaki verileri okuyup 
-// duzenleyerek veritabanina kaydeder
+// Bu fonksiyon ogrenciListesi.xlsx dosyasındaki verileri okuyup 
+// düzenleyerek veritabanına kaydeder
 
 function readXlsxFileWriteToDB() {
 
-	// XLSX dosyasini okumak icin workbook adinda nesne olusturuyoruz
+	// XLSX dosyasını okumak icin workbook adında nesne olusturulur
 	let workbook = new Excel.Workbook()
 
-	// Bu nesne sayesinde ismini global sabit olarak tanimladigimiz dosyayi okuyoruz
+	// Bu nesne sayesinde ismini global sabit olarak tanımladığımız dosyayı okuyoruz
 	workbook.xlsx.readFile(xlsxStudentList).then(
 		() => {
-			// Bu nesne bir excel kitabi gibi dusunulebilir
-			// kitabin her sayfasini okumak icin eachSheet methodu kullaniliyor
+			// Bu nesne bir excel kitabı gibi düşünülebilir
+			// kitabın her sayfasını okumak icin eachSheet methodu kullanılır
 			workbook.eachSheet(
 				(worksheet, sheetId) => {
-					// worksheet burada sayfayi temsil ediyor
+					// worksheet burada sayfayı temsil eder
 					let rowCount = worksheet.rowCount
-					// rowCount: veri olan son satirin numarasi
-					// bizim dosyamizda ilk satirda baslik var
-					// yani 2 numarali satirdan okumaya baslayacagiz
+					// rowCount: veri olan son satırın numarası
+					// bizim dosyamızda ilk satırda başlık var
+					// yani 2 numarali satırdan okumaya başlıyoruz
 					let startingIndex = 2
 
-					// Her satira erismek icin dongu
+					// Her satıra erişmek için döngü
 					while (startingIndex <= rowCount) {
-						// 1. hucre okul numarasi yani id
-						// 2. hucre isim
+						// 1. hücre okul numarası yani id
+						// 2. hücre isim
 						let row = worksheet.getRow(startingIndex)
-/*
-						// Console'a isimlerin yazilmasi
-						console.log(
-							`|oo| ${String(
-								row.getCell(1)
-							)}\t ${toUpperFirstLetter(
-								String(row.getCell(2))
-							)}`
-						)
-*/
-						// PostgreSQL veritabanina veri ekleniyor
+
+						// PostgreSQL veritabanına veri eklenir
 						db(
 							{
 								text:QUERIES.add_person,
@@ -112,21 +99,20 @@ function readXlsxFileWriteToDB() {
 	})
 }
 
-
-// Bu fonksiyon ogrenciNetwork.csv dosyasindaki verileri okur ve veriabanina kaydeder
+// Bu fonksiyon ogrenciNetwork.csv dosyasındaki verileri okur ve veritabanına kaydeder
 function readCsvFileWriteToDBforFriendship() {
 
 	workbook = new Excel.Workbook()
 
 	workbook.csv.readFile(csvStudentNetwork).then((worksheet) => {
-		// eachRow ile dosyanin satirlari gezilir
-		// includeEmpty: true ile bos olan satirlari da kapsar
+		// eachRow ile dosyanın satırları gezilir
+		// includeEmpty: true ile boş olan satırları da kapsar
 		worksheet.eachRow(
 			{
 				includeEmpty: false,
 			},
 			function(row, rowNumber) {
-				// Satirin butun hucrelerinde gezilir
+				// Satırın bütün hücrelerinde gezilir
 				row.eachCell(
 					{
 						includeEmpty: false,
@@ -139,7 +125,7 @@ function readCsvFileWriteToDBforFriendship() {
 
 						console.log(colNumber)
 						console.log(`${row.getCell(1).value} ---> ${cell.value}`)
-						// PostgreSQL veritabanina veri ekleniyor
+						// PostgreSQL veritabanına veri eklenir
 						db(
 							{
 								text:QUERIES.add_friendship,
@@ -167,19 +153,21 @@ function readCsvFileWriteToDBforFriendship() {
 	})
 
 }
+
+// Bu fonksiyon ogrenciProfil.csv dosyasındaki verileri okur ve veritabanına kaydeder
 function readCsvFileWriteToDBforProfile() {
 
 	workbook = new Excel.Workbook()
 
 	workbook.csv.readFile(csvStudentProfile).then((worksheet) => {
-		// eachRow ile dosyanin satirlari gezilir
-		// includeEmpty: true ile bos olan satirlari da kapsar
+		// eachRow ile dosyanın satırları gezilir
+		// includeEmpty: true ile bos olan satırları da kapsar
 		worksheet.eachRow(
 			{
 				includeEmpty: false,
 			},
 			function(row, rowNumber) {
-				// Satirin butun hucrelerinde gezilir
+				// Satırın bütün hücrelerinde gezilir
 
 				let cells = []
 				row.eachCell(
@@ -192,7 +180,7 @@ function readCsvFileWriteToDBforProfile() {
 					}
 				)
 
-				// PostgreSQL veritabanina veri ekleniyor
+				// PostgreSQL veritabanına veri eklenir
 				db(
 					{
 						text:QUERIES.add_profile,
@@ -215,6 +203,8 @@ function readCsvFileWriteToDBforProfile() {
 	})
 
 }
+
+// Veritabanına kaydederken ilk harfleri büyük yapmak için kullanılan fonksiyon
 function toUpperFirstLetter(expr) {
 	expr = expr.toLocaleLowerCase()
 
